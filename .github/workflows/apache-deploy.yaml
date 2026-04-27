@@ -44,8 +44,8 @@ jobs:
 
       - name: Install Apache
         run: |
-          apt-get update
-          apt-get install -y apache2
+          sudo apt-get update
+          sudo apt-get install -y apache2
         shell: bash
 
       - name: Deploy to Apache
