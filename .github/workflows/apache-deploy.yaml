@@ -51,7 +51,7 @@ jobs:
       - name: Deploy to Apache
         run: |
           set -e
-          cp -r ./public-html/* /var/www/html/
+          sudo cp -r ./public-html/* /var/www/html/
           echo "Deploy completed successfully"
         shell: bash
 
