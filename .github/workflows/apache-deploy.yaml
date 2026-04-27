@@ -1,0 +1,66 @@
+name: Distribuisci sito Apache
+
+
+
+on:
+
+  push:
+
+    branches: [ main ]
+
+
+jobs:
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Validate site files
+        id: validate
+        run: |
+          echo "Validating site structure..."
+          if [ ! -d "./public-html" ]; then
+            echo "Error: public-html directory not found"
+            exit 1
+          fi
+          if [ ! -f "./public-html/index.html" ]; then
+            echo "Warning: index.html not found"
+          fi
+          echo "files_count=$(find ./public-html -type f | wc -l)" >> $GITHUB_OUTPUT
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/*.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install Apache
+        run: |
+          apt-get update
+          apt-get install -y apache2
+        shell: bash
+
+      - name: Deploy to Apache
+        run: |
+          set -e
+          cp -r ./public-html/* /var/www/html/
+          echo "Deploy completed successfully"
+        shell: bash
+
+      - name: Verify deployment
+        run: |
+          if [ -f "/var/www/html/index.html" ]; then
+            echo "Deployment verified: index.html exists"
+          else
+            echo "Error: index.html not found after deploy"
+            exit 1
+          fi
+        shell: bash
